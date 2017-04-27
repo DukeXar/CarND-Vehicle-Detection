@@ -63,7 +63,7 @@ class LanesProcessPipeline(object):
 
 
 class CarsProcessingPipeline(object):
-    def __init__(self, model_filename, y_bounds):
+    def __init__(self, model_filename, y_bounds, processing_video):
         model = car_classifier.load_pickle(model_filename)
         self._classifier = model['classifier']
         self._scaler = model['scaler']
@@ -73,33 +73,38 @@ class CarsProcessingPipeline(object):
             'feature_scaler': self._scaler,
             'classifier': self._classifier,
             'y_bounds': y_bounds,
+            'src_stripes': ((64, y_bounds[0], y_bounds[0]+64),
+                            (72, y_bounds[0], y_bounds[0]+72),
+                            (96, y_bounds[0], y_bounds[0]+96),
+                            (128, y_bounds[0], y_bounds[0]+128),
+                            (192,  y_bounds[0], y_bounds[0]+192)),
+            #'hog_cells_per_step': 0.25, # For hog_px = 16, this is 0.25 * 16 = 4 px step
+            #'hog_cells_per_step': 2, TODO
+            'hog_cells_per_step': 0.5,
+            'hog_non_bulk': False,
+            'confidence_threshold': None,
             'dump_stats': False,
-            #'scales': (1.0, 1.2, 1.4, 1.7, 1.9, 2.2),
-            #'scales': (1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2),
-            # Last good:
-            'scales': (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0),
-            'cells_per_step': 2
-            #'cells_per_step': 3
         })
 
-        # Good for static images
-        heatmap_threshold = 2
-        heatmap_accumulator_threshold = 1
-
-        # Good for video
-        heatmap_threshold = 2
-        heatmap_accumulator_threshold = 3
+        if processing_video:
+            print('Processing video mode')
+            heatmap_threshold = 3
+            heatmap_accumulator_threshold = 6
+        else:
+            heatmap_threshold = 0
+            heatmap_accumulator_threshold = 1
 
         self._input = car_classifier.Input()
-        self._sliding_window_search = car_classifier.SlidingWindowSearch(**search_kwargs)
+        self._heatmap = car_classifier.Heatmap(heatmap_threshold, heatmap_accumulator_threshold, self._input)
+        self._sliding_window_search = car_classifier.SlidingWindowSearchWithStripes(**search_kwargs)
 
         self._stages = collections.OrderedDict([
             ('0.input', self._input),
             ('1.find', self._sliding_window_search),
             #('2.display', car_classifier.DisplaySlidingWindows(y_bounds, self._input)),
-            ('3.heatmap', car_classifier.Heatmap(heatmap_threshold, heatmap_accumulator_threshold, self._input)),
+            ('3.heatmap', self._heatmap),
             ('4.labels', car_classifier.Labels(self._input)),
-            ('5.display', car_classifier.DisplayCarBoxes(self._input)),
+            ('5.display', car_classifier.DisplayCarBoxes(self._input, self._heatmap)),
         ])
 
     def process_frame(self, image, limit=-1):
@@ -142,7 +147,7 @@ def main():
     args = parser.parse_args()
 
     if args.cars:
-        process_pipeline = CarsProcessingPipeline(args.model, (400, 620))
+        process_pipeline = CarsProcessingPipeline(args.model, (390, 620), (args.clip) and (args.time is None))
     else:
         offset_x = 400
         offset_y = 0

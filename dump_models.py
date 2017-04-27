@@ -19,6 +19,8 @@ for fname in filenames:
         'hog_orient': p['extractor_parameters']['hog_orient'],
         'hog_pix_per_cell': p['extractor_parameters']['hog_pix_per_cell'],
         'spatial_size': p['extractor_parameters']['spatial_size'][0],
+        'accuracy': p['accuracy'],
+        'features': p['features_shape'][1],
     })
 
 with open('models.csv', 'w') as csvfile:

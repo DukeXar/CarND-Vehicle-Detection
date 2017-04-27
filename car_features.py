@@ -5,13 +5,13 @@ from skimage.feature import hog
 from pipeline import Processor
 
 
-def get_hog_features(img, orient, pix_per_cell, cell_per_block,
+def get_hog_features(img, orient, pix_per_cell, cell_per_block, transform_sqrt,
                      vis=False, feature_vec=True):
     """
     Returns `(features, hog_image)` tuple when `vis` is set, otherwise returns just `features` 
     """
     return hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
-               cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=True, visualise=vis,
+               cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=transform_sqrt, visualise=vis,
                feature_vector=feature_vec)
 
 
@@ -64,7 +64,8 @@ class ExtractFeatures(Processor):
     """
 
     def __init__(self, color_space='RGB', spatial_size=(32, 32), hist_bins=32, hog_orient=9, hog_pix_per_cell=8,
-                 hog_cell_per_block=2, hog_channel=0, spatial_feat=True, hist_feat=True, hog_feat=True):
+                 hog_cell_per_block=2, hog_channel=0, transform_sqrt=True, spatial_feat=True, hist_feat=True,
+                 hog_feat=True):
         super().__init__()
         self._color_space = color_space
         self._spatial_size = spatial_size
@@ -73,6 +74,7 @@ class ExtractFeatures(Processor):
         self._hog_pix_per_cell = hog_pix_per_cell
         self._hog_cell_per_block = hog_cell_per_block
         self._hog_channel = hog_channel
+        self._transform_sqrt = transform_sqrt
         self._spatial_feat = spatial_feat
         self._hist_feat = hist_feat
         self._hog_feat = hog_feat
@@ -97,11 +99,12 @@ class ExtractFeatures(Processor):
                     hog_features.extend(get_hog_features(feature_image[:, :, channel],
                                                          self._hog_orient, self._hog_pix_per_cell,
                                                          self._hog_cell_per_block,
+                                                         self._transform_sqrt,
                                                          vis=False, feature_vec=True))
             else:
                 hog_features = get_hog_features(feature_image[:, :, self._hog_channel], self._hog_orient,
-                                                self._hog_pix_per_cell, self._hog_cell_per_block, vis=False,
-                                                feature_vec=True)
+                                                self._hog_pix_per_cell, self._hog_cell_per_block, self._transform_sqrt,
+                                                vis=False, feature_vec=True)
 
             features_result.append(hog_features)
 
