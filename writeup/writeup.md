@@ -20,7 +20,7 @@ The goals / steps of this project are the following:
 [hog_non_vehicle_hog_2]: non-vehicle_c8_o11_1.png
 [hog_non_vehicle_hog_3]: non-vehicle_c8_o11_2.png
 
-[sliding_windows]: sliding_windows.png
+[sliding_windows]: sliding_windows.jpg
 
 [model_6_table]: model_6_table.png
 
@@ -56,8 +56,8 @@ Here is an example of the HOG features image using `YCrCb` color space and HOG p
 
 |  | Input | Channel 1 | Channel 2 | Channel 3 |
 | --- | --- | --- | --- | --- |
-| vehicle | ![hog_vehicle_input] | ![hog_vehicle_hog_1] | ![hog_vehicle_hog_2]| | ![hog_vehicle_hog_3] |
-| non-vehicle | ![hog_non_vehicle_input] | ![hog_non_vehicle_hog_1] | ![hog_non_vehicle_hog_2]| | ![hog_non_vehicle_hog_3] |
+| vehicle | ![hog_vehicle_input] | ![hog_vehicle_hog_1] | ![hog_vehicle_hog_2] | ![hog_vehicle_hog_3] |
+| non-vehicle | ![hog_non_vehicle_input] | ![hog_non_vehicle_hog_1] | ![hog_non_vehicle_hog_2] | ![hog_non_vehicle_hog_3] |
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
 
